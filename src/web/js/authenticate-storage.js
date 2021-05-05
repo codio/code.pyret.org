@@ -3,10 +3,16 @@ var storageAPIDeferred = Q.defer();
 var sheetsAPIDeferred = Q.defer();
 window.storageAPI = storageAPIDeferred.promise;
 window.sheetsAPI = sheetsAPIDeferred.promise;
+window.isCodio = document.location.hash.replace('#', '') === "codio";
 
 window.handleClientLoad = function handleClientLoad(apiKey) {
-  gapi.client.setApiKey(apiKey);
-  var api = createProgramCollectionAPI("code.pyret.org", true);
+  const defer = Q.defer();
+  var api = defer.promise;
+  defer.reject(new Error("inside Codio"));
+  if (!isCodio) {
+    gapi.client.setApiKey(apiKey);
+    api = createProgramCollectionAPI("code.pyret.org", true);
+  }
 
   api.then(function(api) {
     storageAPIDeferred.resolve(api);

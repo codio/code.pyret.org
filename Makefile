@@ -37,15 +37,18 @@ selenium-test-sauce:
 	TEST_LOC="sauce" node test/test.js test/browser/pyret
 
 
-OUT_HTML := $(patsubst src/web/%.template.html,build/web/views/%.html,$(wildcard src/web/*.template.html))
+# OUT_HTML := $(patsubst src/web/%.template.html,build/web/views/%.html,$(wildcard src/web/*.template.html))
 
-build/web/views/%.html: src/web/%.template.html
+# build/web/views/%.html: src/web/%.html
+# 	node make-template.js $< > $@
+
+COPY_HTML := $(patsubst src/web/%.html,build/web/%.html,$(wildcard src/web/*.html))
+
+build/web/%.html: src/web/%.html
 	node make-template.js $< > $@
-
-COPY_HTML := $(patsubst src/web/%.html,build/web/views/%.html,$(wildcard src/web/*.html))
-
-build/web/views/%.html: src/web/%.html
-	cp $< $@
+#
+# build/web/views/%.html: src/web/%.html
+# 	cp $< $@
 
 OUT_CSS := $(patsubst src/web/%.template.css,build/web/%.css,$(wildcard src/web/css/*.template.css))
 
@@ -87,12 +90,20 @@ build/web/img/%.svg: src/web/img/%.svg
 
 COPY_JS := $(patsubst src/web/js/%.js,build/web/js/%.js,$(wildcard src/web/js/*.js))
 
+# build/web/js/%.js: src/web/js/%.js
+# 	cp $< $@
+#
 build/web/js/%.js: src/web/js/%.js
-	cp $< $@
+	node make-template.js $< > $@
 
 COPY_GOOGLE_JS := $(patsubst src/web/js/google-apis/%.js,build/web/js/google-apis/%.js,$(wildcard src/web/js/google-apis/*.js))
 
 build/web/js/google-apis/%.js: src/web/js/google-apis/%.js
+	cp $< $@
+
+COPY_CODIO_JS := $(patsubst src/web/js/codio-apis/%.js,build/web/js/codio-apis/%.js,$(wildcard src/web/js/codio-apis/*.js))
+
+build/web/js/codio-apis/%.js: src/web/js/codio-apis/%.js
 	cp $< $@
 
 build/web/js/beforePyret.js: src/web/js/beforePyret.js
@@ -197,6 +208,7 @@ WEBTHEMES = build/web/css/themes
 WEBFONTS = $(WEBCSS)/fonts
 WEBIMG = build/web/img
 WEBARR = build/web/arr
+WEBJSCODIO = build/web/js/codio-apis
 
 $(WEBV):
 	@$(call MKDIR,$(WEBV))
@@ -225,9 +237,12 @@ $(WEBIMG):
 $(WEBARR):
 	@$(call MKDIR,$(WEBARR))
 
-web-local: $(WEB) $(WEBV) $(WEBJS) $(WEBJSGOOG) $(WEBCSS) $(WEBTHEMES) $(WEBFONTS) $(WEBIMG) $(WEBARR) $(OUT_HTML) $(COPY_HTML) $(OUT_CSS) $(COPY_CSS) $(COPY_THEMES) $(COPY_FONTS) $(COPY_JS) $(COPY_ARR) $(COPY_GIF) $(COPY_SVG) $(MISC_JS) $(MISC_CSS) $(MISC_IMG) $(COPY_NEW_CSS) $(COPY_NEW_JS) $(COPY_GOOGLE_JS) $(CPOMAIN) $(CPOGZ)
+$(WEBJSCODIO):
+	@$(call MKDIR,$(WEBJSCODIO))
 
-web: $(WEB) $(WEBV) $(WEBJS) $(WEBJSGOOG) $(WEBCSS) $(WEBTHEMES) $(WEBFONTS) $(WEBIMG) $(WEBARR) $(OUT_HTML) $(COPY_HTML) $(OUT_CSS) $(COPY_CSS) $(COPY_THEMES) $(COPY_FONTS) $(COPY_JS) $(COPY_ARR) $(COPY_GIF) $(COPY_SVG) $(MISC_JS) $(MISC_CSS) $(MISC_IMG) $(COPY_NEW_CSS) $(COPY_NEW_JS) $(COPY_GOOGLE_JS)
+web-local: $(WEB) $(WEBV) $(WEBJS) $(WEBJSGOOG) $(WEBCSS) $(WEBTHEMES) $(WEBFONTS) $(WEBIMG) $(WEBARR) $(OUT_HTML) $(COPY_HTML) $(OUT_CSS) $(COPY_CSS) $(COPY_THEMES) $(COPY_FONTS) $(COPY_JS) $(COPY_ARR) $(COPY_GIF) $(COPY_SVG) $(MISC_JS) $(MISC_CSS) $(MISC_IMG) $(COPY_NEW_CSS) $(COPY_NEW_JS) $(COPY_GOOGLE_JS) $(CPOMAIN) $(CPOGZ) $(WEBJSCODIO) $(COPY_CODIO_JS)
+
+web: $(WEB) $(WEBV) $(WEBJS) $(WEBJSGOOG) $(WEBCSS) $(WEBTHEMES) $(WEBFONTS) $(WEBIMG) $(WEBARR) $(OUT_HTML) $(COPY_HTML) $(OUT_CSS) $(COPY_CSS) $(COPY_THEMES) $(COPY_FONTS) $(COPY_JS) $(COPY_ARR) $(COPY_GIF) $(COPY_SVG) $(MISC_JS) $(MISC_CSS) $(MISC_IMG) $(COPY_NEW_CSS) $(COPY_NEW_JS) $(COPY_GOOGLE_JS) $(COPY_CODIO_JS)
 
 link-pyret:
 	ln -s node_modules/pyret-lang pyret;

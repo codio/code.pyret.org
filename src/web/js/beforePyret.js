@@ -110,7 +110,9 @@ function checkVersion() {
     }
   });
 }
-window.setInterval(checkVersion, VERSION_CHECK_INTERVAL);
+if (!window.isCodio) {
+  window.setInterval(checkVersion, VERSION_CHECK_INTERVAL);
+}
 
 window.CPO = {
   save: function() {},
@@ -231,17 +233,28 @@ $(function() {
   };
 
   function setUsername(target) {
-    return gwrap.load({name: 'plus',
-      version: 'v1',
-    }).then((api) => {
-      api.people.get({ userId: "me" }).then(function(user) {
-        var name = user.displayName;
-        if (user.emails && user.emails[0] && user.emails[0].value) {
-          name = user.emails[0].value;
-        }
-        target.text(name);
+    if (window.isCodio) {
+      target.text('Codio')
+    } else {
+      return gwrap.load({name: 'plus',
+        version: 'v1',
+      }).then((api) => {
+        api.people.get({ userId: "me" }).then(function(user) {
+          var name = user.displayName;
+          if (user.emails && user.emails[0] && user.emails[0].value) {
+            name = user.emails[0].value;
+          }
+          target.text(name);
+        });
       });
-    });
+    }
+  }
+
+  if (window.isCodio) {
+    window.codio.loaded()
+      .then(() => {
+        setUsername($("#username"));
+      })
   }
 
   storageAPI.then(function(api) {
@@ -302,44 +315,81 @@ $(function() {
     If the url does have a #program or #share, the promise is for the
     corresponding object.
   */
-  var initialProgram = storageAPI.then(function(api) {
-    var programLoad = null;
-    if(params["get"] && params["get"]["program"]) {
-      enableFileOptions();
-      programLoad = api.getFileById(params["get"]["program"]);
-      programLoad.then(function(p) { showShareContainer(p); });
-    }
-    if(params["get"] && params["get"]["share"]) {
-      logger.log('shared-program-load',
-        {
-          id: params["get"]["share"]
+  var initialProgram;
+  if (window.isCodio) {
+    initialProgram = codioApi.load().then(function(api) {
+      var programLoad = api.getFile().then(function(data) {
+        return {
+          shared: false,
+          content: data.content,
+          save: function (content) {
+            return codioApi.saveFile(content)
+              .then(() => {
+                CPO.editor.cm.doc.markClean();
+                return programLoad;
+              });
+          },
+          getName: function () {
+            return codioApi.getFileName();
+          },
+          getContents: function () {
+            return codioApi.getFile()
+              .then(data => {
+                return data.content;
+              });
+          }
+        };
+      });
+      if(programLoad) {
+        programLoad.fail(function(err) {
+          console.error(err);
+          window.stickError("The program failed to load.");
         });
-      programLoad = api.getSharedFileById(params["get"]["share"]);
-      programLoad.then(function(file) {
-        // NOTE(joe): If the current user doesn't own or have access to this file
-        // (or isn't logged in) this will simply fail with a 401, so we don't do
-        // any further permission checking before showing the link.
-        file.getOriginal().then(function(response) {
-          console.log("Response for original: ", response);
-          var original = $("#open-original").show().off("click");
-          var id = response.result.value;
-          original.removeClass("hidden");
-          original.click(function() {
-            window.open(window.APP_BASE_URL + "/editor#program=" + id, "_blank");
+        return programLoad;
+      } else {
+        return null;
+      }
+    })
+  } else {
+    initialProgram = storageAPI.then(function(api) {
+      var programLoad = null;
+      if(params["get"] && params["get"]["program"]) {
+        enableFileOptions();
+        programLoad = api.getFileById(params["get"]["program"]);
+        programLoad.then(function(p) { showShareContainer(p); });
+      }
+      if(params["get"] && params["get"]["share"]) {
+        logger.log('shared-program-load',
+          {
+            id: params["get"]["share"]
+          });
+        programLoad = api.getSharedFileById(params["get"]["share"]);
+        programLoad.then(function(file) {
+          // NOTE(joe): If the current user doesn't own or have access to this file
+          // (or isn't logged in) this will simply fail with a 401, so we don't do
+          // any further permission checking before showing the link.
+          file.getOriginal().then(function(response) {
+            console.log("Response for original: ", response);
+            var original = $("#open-original").show().off("click");
+            var id = response.result.value;
+            original.removeClass("hidden");
+            original.click(function() {
+              window.open(window.APP_BASE_URL + "/editor#program=" + id, "_blank");
+            });
           });
         });
-      });
-    }
-    if(programLoad) {
-      programLoad.fail(function(err) {
-        console.error(err);
-        window.stickError("The program failed to load.");
-      });
-      return programLoad;
-    } else {
-      return null;
-    }
-  });
+      }
+      if(programLoad) {
+        programLoad.fail(function(err) {
+          console.error(err);
+          window.stickError("The program failed to load.");
+        });
+        return programLoad;
+      } else {
+        return null;
+      }
+    });
+  }
 
   function setTitle(progName) {
     document.title = progName + " - code.pyret.org";
@@ -522,6 +572,9 @@ $(function() {
   var programToSave = initialProgram;
 
   function showShareContainer(p) {
+    if (window.isCodio) {
+      return;
+    }
     //console.log('called showShareContainer');
     if(!p.shared) {
       $("#shareContainer").empty();
@@ -588,15 +641,17 @@ $(function() {
         return p; // Don't try to save shared files
       }
       if(create) {
-        programToSave = storageAPI
-          .then(function(api) { return api.createFile(useName); })
-          .then(function(p) {
-            // showShareContainer(p); TODO(joe): figure out where to put this
-            history.pushState(null, null, "#program=" + p.getUniqueId());
-            updateName(p); // sets filename
-            enableFileOptions();
-            return p;
-          });
+        if (!window.isCodio) {
+          programToSave = storageAPI
+            .then(function(api) { return api.createFile(useName); })
+            .then(function(p) {
+              // showShareContainer(p); TODO(joe): figure out where to put this
+              history.pushState(null, null, "#program=" + p.getUniqueId());
+              updateName(p); // sets filename
+              enableFileOptions();
+              return p;
+            });
+        }
         return programToSave.then(function(p) {
           return save();
         });
@@ -1148,6 +1203,18 @@ $(function() {
     // in which undo can revert the program back to empty
     CPO.editor.cm.setValue(c);
     CPO.editor.cm.clearHistory();
+    if (window.isCodio) {
+      CPO.editor.cm.doc.markClean();
+      window.codio.loaded()
+        .then(() => {
+          window.codio.subscribe("callSave", () => {
+            return save();
+          });
+          window.codio.subscribe("hasChanges", () => {
+            return !CPO.editor.cm.doc.isClean();
+          });
+        })
+    }
   });
 
   programLoaded.fail(function() {
