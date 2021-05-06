@@ -143,7 +143,7 @@ class StudentDashboard extends Component {
         <div id='header' className=''>
           <div className='container'>
             <div className='left' aria-label='Welcome to Pyret'>
-              <img src='/img/pyret-logo.png' aria-hidden='true' className='dashboard-logo'></img>
+              <img src='./img/pyret-logo.png' aria-hidden='true' className='dashboard-logo'></img>
               <div className='header'>
                 <h1 className='logo-text'>{APP_NAME}</h1>
                 <h2 className={'person-text ' + (this.state.userName === false ? 'hidden' : '')}>{this.state.userName}</h2>
