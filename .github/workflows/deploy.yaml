@@ -15,6 +15,9 @@ jobs:
       - name: Setup env
         run: npm i
 
+      - name: copy env
+        run: cp .env.codio .env
+
       - name: Build
         run: npm run build
         env:
