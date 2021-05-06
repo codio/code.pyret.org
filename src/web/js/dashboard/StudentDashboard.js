@@ -168,7 +168,7 @@ class StudentDashboard extends Component {
         <div className={'main middle container ' + (this.state.signedIn === NOT_SIGNED_IN ? '' : 'hidden')}>
 
           <div className={'middle large-logo-container'} aria-label='Pyret'>
-            <img src="/img/pyret-logo.png" aria-hidden='true'></img>
+            <img src="./img/pyret-logo.png" aria-hidden='true'></img>
           </div>
 
           <div className='clearfix'></div>
