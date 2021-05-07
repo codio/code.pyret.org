@@ -1235,7 +1235,7 @@
         var container = $("<span>").addClass("replToggle replOutput replCycle");
         var renderings = [];
 
-        var brush = $("<img>").addClass("paintBrush").attr("src", "/img/brush.svg");
+        var brush = $("<img>").addClass("paintBrush").attr("src", "./img/brush.svg");
         var raw_r = runtime.unwrap(runtime.getField(val, "red"));
         var raw_g = runtime.unwrap(runtime.getField(val, "green"));
         var raw_b = runtime.unwrap(runtime.getField(val, "blue"));
@@ -1321,7 +1321,7 @@
           var scaled = image.makeScaleImage(scaleFactor, scaleFactor, img);
           imageDom = scaled.toDomNode();
           container.append(imageDom);
-          container.append($("<img>").attr("src", "/img/magnifier.gif").addClass("info-icon"));
+          container.append($("<img>").attr("src", "./img/magnifier.gif").addClass("info-icon"));
           $(imageDom).trigger({type: 'afterAttach'});
           $('*', imageDom).trigger({type : 'afterAttach'});
           var originalImageDom = img.toDomNode();
@@ -1501,7 +1501,7 @@
         var valueContainer = $("<span>").addClass("replRef")
         container.append(valueContainer.append(top.done[0]));
         var warning = $("<img>")
-          .attr("src", "/img/warning.gif")
+          .attr("src", "./img/warning.gif")
           .attr("title", "May be stale! Click to refresh")
           .addClass("info-icon");
         container.append(warning);
