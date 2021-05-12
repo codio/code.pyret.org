@@ -179,3 +179,8 @@ https://devcenter.heroku.com/articles/getting-started-with-nodejs
 
 7.	Now run `heroku open` or visit appname.herokuapp.com.
 8.  Tips for redeploy: if you don't see a successful build under heroku webiste's activity tab, but get "everything is up-to-date" when you run `git push heroku <localbranch>:master`, or your build doesn't look up-to-date, you can do an empty commit: `git commit --allow-empty -m "force deploy"`
+
+## Codio
+Added `codio-client.js` link to `editor.html`
+Build minified client with `NODE_ENV=production npm run build`
+Upload to S3 `./s3-upload.sh "s3_assets_access_key" "s3_assets_access_secret"` 

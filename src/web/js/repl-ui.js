@@ -563,7 +563,7 @@
       }
 
       var img = $("<img>").attr({
-        "src": "/img/pyret-spin.gif",
+        "src": "./img/pyret-spin.gif",
         "width": "25px",
       }).css({
         "vertical-align": "middle"
@@ -757,7 +757,7 @@
           // Note: renderedLocs is one element shorter than rendered
           var renderedLocs = locs.map(repl.runtime.makeSrcloc);
           var spyBlock = $("<div>").addClass("spy-block");
-          spyBlock.append($("<img>").addClass("spyglass").attr("src", "/img/spyglass.gif"));
+          spyBlock.append($("<img>").addClass("spyglass").attr("src", "./img/spyglass.gif"));
           if (message !== "") {
             spyBlock.append($("<div>").addClass("spy-title").append(message));
           }

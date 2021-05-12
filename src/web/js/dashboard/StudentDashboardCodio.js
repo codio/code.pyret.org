@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import GoogleAPI from './GoogleAPI.js';
+import CodioAPI from './CodioAPI';
 import {CLIENT_ID, FILE_EXT, APP_NAME, API_KEY} from './config.js';
 import File from './File';
 
@@ -21,22 +21,14 @@ class StudentDashboard extends Component {
       files: [],
       activeTab: 'recent-files',
       newFileName: '',
-      userName: false
+      userName: 'codio'
     };
 
-    this.api = new GoogleAPI();
+    this.api = new CodioAPI();
     var apiLoaded = this.api.load();
     apiLoaded.then((resp) => {
-      if(resp.hasAuth()) {
-        this.setState({signedIn: SIGNED_IN});
-        this.updateRecentFiles();
-        this.api.getUsername().then((userInfo) => {
-          this.setState({ userName: userInfo.emails[0].value });
-        });
-      }
-      else {
-        this.setState({ signedIn: NOT_SIGNED_IN });
-      }
+      this.setState({signedIn: SIGNED_IN});
+      // this.updateRecentFiles();
     });
     apiLoaded.fail((e) => {
       this.setState({ signedIn: NOT_SIGNED_IN });
@@ -56,9 +48,9 @@ class StudentDashboard extends Component {
       });
       this.updateRecentFiles();
     })
-    .fail((resp) => {
-      this.setState({ signedIn: NOT_SIGNED_IN });
-    });
+      .fail((resp) => {
+        this.setState({ signedIn: NOT_SIGNED_IN });
+      });
   }
 
   handleSignOutClick = (event) => {
@@ -158,7 +150,7 @@ class StudentDashboard extends Component {
               </div>
             </div>
             <div className='button-wrapper right'>
-              <button className={'auth-button ' + (this.state.signedIn !== NOT_SIGNED_IN ? '' : 'hidden')} onClick={this.handleSignOutClick} id='signout-button' >Sign out</button>
+              <button className={'auth-button ' + (!window.isCodio || this.state.signedIn !== NOT_SIGNED_IN ? '' : 'hidden')} onClick={this.handleSignOutClick} id='signout-button' >Sign out</button>
             </div>
             <div className='button-wrapper right start'>
               <button className={'start-button ' + (this.state.signedIn === SIGNED_IN ? '' : 'hidden')} onClick={this.handleStartCodingClick} id='start-button' >Open Editor</button>
@@ -204,17 +196,17 @@ class StudentDashboard extends Component {
           <div id='file-picker-modal-body' className={'modal-body ' + ((this.state.activeTab === 'new-file') ? 'hidden' : '')}>
             {
               this.state.files === WAITING_FOR_FILES ?
-              (<div id='loading-spinner'>
-                <h2>Loading files...</h2>
-                <i className='fa fa-circle-o-notch fast-spin fa-3x fa-fw'></i>
-              </div>)
-              :
+                (<div id='loading-spinner'>
+                  <h2>Loading files...</h2>
+                  <i className='fa fa-circle-o-notch fast-spin fa-3x fa-fw'></i>
+                </div>)
+                :
                 this.state.files.length > 0 ?
-                    (<div className='file-list cf'>
-                      {this.state.files.map((f) => {return <File key={f.id} id={f.id} name={f.name} modifiedTime={f.modifiedTime} />;})}
-                    </div>)
+                  (<div className='file-list cf'>
+                    {this.state.files.map((f) => {return <File key={f.id} id={f.id} name={f.name} modifiedTime={f.modifiedTime} />;})}
+                  </div>)
                   :
-                    <p><em>No Pyret files yet, use New File above to create one.</em></p>
+                  <p><em>No Pyret files yet, use New File above to create one.</em></p>
             }
           </div>
           <div className={'modal-body ' + ((this.state.activeTab === 'new-file') ? '' : 'hidden')}>
