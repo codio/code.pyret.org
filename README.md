@@ -20,6 +20,12 @@ use the standalone pyret that comes with the checkout, you can just set
 PYRET="http://localhost:5000/js/cpo-main.jarr"
 ```
 
+After npm install
+
+```text
+$ npm run make-webpack
+```
+
 Then you can run
 
 ```
