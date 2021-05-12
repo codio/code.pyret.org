@@ -14,12 +14,6 @@ jobs:
 
       - name: Setup env
         run: npm i
-
-      - name: Link pyret
-        run: ln -s node_modules/pyret-lang pyret
-
-      - name: Build
-        run: npm run build
         env:
           GOOGLE_CLIENT_ID: ""
           GOOGLE_CLIENT_SECRET: ""
@@ -38,6 +32,12 @@ jobs:
           FIREBASE_DB_URL: ""
           FIREBASE_BUCKET: ""
           FIREBASE_SENDER_ID: ""
+
+      - name: Link pyret
+        run: ln -s node_modules/pyret-lang pyret
+
+      - name: Build
+        run: npm run build
 
 
       - name: Deploy to S3
