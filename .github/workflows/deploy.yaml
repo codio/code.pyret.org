@@ -1,4 +1,4 @@
-name: publish docs
+name: upload to S3
 on:
   push:
     branches:
@@ -17,6 +17,9 @@ jobs:
 
       - name: copy env
         run: cp .env.codio .env
+
+      - name: Link pyret
+        run: ln -s node_modules/pyret-lang pyret
 
       - name: Build
         run: npm run build
